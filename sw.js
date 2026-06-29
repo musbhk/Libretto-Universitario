@@ -1,5 +1,5 @@
 /* Service worker — cache dell'app shell per il funzionamento offline. */
-const CACHE = 'libretto-v2';
+const CACHE = 'libretto-v3';
 const ASSETS = [
   './',
   './index.html',
