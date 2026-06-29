@@ -1,6 +1,6 @@
 # Libretto
 
-Web app (PWA) per **proiettare la media ponderata universitaria**, aggiornarla dopo ogni esame e **archiviare gli esami accettati**. Funziona offline, si installa sulla schermata Home dell'iPhone e tiene i dati solo sul dispositivo (niente server, niente account).
+Web app (PWA) per **proiettare la media ponderata universitaria**, aggiornarla dopo ogni esame e **archiviare gli esami accettati**. Funziona offline, si installa sulla schermata Home iPhone e tiene i dati solo sul dispositivo (niente server, niente account).
 
 Pensata per il sistema italiano: voti in trentesimi, CFU, idoneità escluse dalla media, voto base di laurea in centodecimi.
 
