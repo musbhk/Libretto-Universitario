@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Libretto — media ponderata</title>
+  <meta name="description" content="Proiezione della media ponderata universitaria, aggiornabile dopo ogni esame, con archivio degli esami accettati." />
+
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#4263EB" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Libretto" />
+  <link rel="apple-touch-icon" href="icons/icon-180.png" />
+  <link rel="icon" href="icons/icon-192.png" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main id="app">
+    <!-- ======================= TAB: PROIEZIONE ======================= -->
+    <section class="tab" id="tab-proiezione" data-tab="proiezione">
+      <header class="tab-header">
+        <h1>Proiezione</h1>
+        <p class="muted" id="proiezione-sub">Aggiornata dopo ogni esame registrato</p>
+      </header>
+
+      <div class="card stat-card">
+        <div class="stat-label">Media ponderata attuale</div>
+        <div class="stat-row">
+          <span class="stat-big" id="media-now">—</span>
+          <span class="stat-unit">/30</span>
+        </div>
+        <div class="stat-meta" id="media-meta">—</div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card metric">
+          <div class="metric-label">CFU acquisiti</div>
+          <div class="metric-value"><span id="cfu-acquired">—</span><span class="metric-sub" id="cfu-total"></span></div>
+        </div>
+        <div class="card metric">
+          <div class="metric-label">Voto base di laurea</div>
+          <div class="metric-value"><span id="base110">—</span><span class="metric-sub">/110</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">Quanto mi serve</h2>
+        <p class="card-desc">Imposta la media a cui punti: vedi il voto medio necessario sui CFU che restano.</p>
+        <div class="control-row">
+          <label for="target">Media obiettivo</label>
+          <input type="range" id="target" min="20" max="30" step="0.1" value="25.5" />
+          <output id="target-out">25.5</output>
+        </div>
+        <div class="result">
+          <div class="result-main">
+            <span class="result-num" id="need-num">—</span>
+            <span class="result-unit">/30 di media sui <span id="need-cfu">—</span> CFU rimasti</span>
+          </div>
+          <span class="badge" id="need-badge"></span>
+        </div>
+        <p class="result-hint" id="need-hint"></p>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">Cosa ottengo</h2>
+        <p class="card-desc">Ipotizza la media che pensi di tenere sugli esami rimanenti: vedi dove chiudi.</p>
+        <div class="control-row">
+          <label for="future">Media ipotetica futura</label>
+          <input type="range" id="future" min="18" max="30" step="0.1" value="27" />
+          <output id="future-out">27</output>
+        </div>
+        <div class="result">
+          <div class="result-main">
+            <span class="result-num" id="final-num">—</span>
+            <span class="result-unit">di media finale &middot; ~<span id="final-110">—</span>/110 base</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================= TAB: ESAMI ======================= -->
+    <section class="tab" id="tab-esami" data-tab="esami" hidden>
+      <header class="tab-header">
+        <h1>Esami</h1>
+        <button class="btn btn-primary" id="add-exam"><span aria-hidden="true">+</span> Aggiungi</button>
+      </header>
+
+      <div class="section-head">
+        <h2>Archiviati</h2>
+        <span class="pill" id="count-done">0</span>
+      </div>
+      <p class="muted small" id="archive-meta">Esami accettati e registrati a libretto.</p>
+      <ul class="exam-list" id="list-done"></ul>
+
+      <div class="section-head">
+        <h2>Da sostenere</h2>
+        <span class="pill" id="count-todo">0</span>
+      </div>
+      <ul class="exam-list" id="list-todo"></ul>
+
+      <div class="section-head">
+        <h2>Idoneità</h2>
+        <span class="pill" id="count-ido">0</span>
+      </div>
+      <p class="muted small">Non contano nella media ponderata.</p>
+      <ul class="exam-list" id="list-ido"></ul>
+    </section>
+
+    <!-- ======================= TAB: INFO ======================= -->
+    <section class="tab" id="tab-info" data-tab="info" hidden>
+      <header class="tab-header">
+        <h1>Info &amp; dati</h1>
+      </header>
+
+      <div class="card">
+        <h2 class="card-title">Come funziona la media</h2>
+        <p class="card-desc">
+          La media ponderata pesa ogni voto per i suoi CFU:
+          <code>Σ(voto×CFU) / Σ(CFU)</code>. Le idoneità (lingua, prova finale)
+          non entrano nel calcolo. Il voto base di laurea è
+          <code>media/30×110</code>, a cui l'università aggiunge i punti di tesi
+          e di carriera.
+        </p>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">I tuoi dati</h2>
+        <p class="card-desc">Restano solo su questo dispositivo (nessun server). Esportali per backup o per spostarli su un altro telefono.</p>
+        <div class="btn-col">
+          <button class="btn" id="export-data">Esporta dati (JSON)</button>
+          <button class="btn" id="import-data">Importa dati</button>
+          <input type="file" id="import-file" accept="application/json,.json" hidden />
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">Ricarica piani</h2>
+        <p class="card-desc">Prima di condividere l'app, azzera i tuoi voti o riparti dal piano vuoto.</p>
+        <div class="btn-col">
+          <button class="btn" id="load-template">Piano Aerospaziale Padova (vuoto)</button>
+          <button class="btn" id="load-seed">I miei dati d'esempio</button>
+          <button class="btn btn-danger" id="clear-all">Azzera tutto</button>
+        </div>
+      </div>
+
+      <p class="footer-note">Libretto · PWA offline · dati locali</p>
+    </section>
+  </main>
+
+  <!-- ======================= TAB BAR ======================= -->
+  <nav class="tabbar" role="tablist">
+    <button class="tabbtn is-active" data-go="proiezione" role="tab" aria-selected="true">
+      <span class="ic" aria-hidden="true">▤</span><span>Proiezione</span>
+    </button>
+    <button class="tabbtn" data-go="esami" role="tab" aria-selected="false">
+      <span class="ic" aria-hidden="true">☰</span><span>Esami</span>
+    </button>
+    <button class="tabbtn" data-go="info" role="tab" aria-selected="false">
+      <span class="ic" aria-hidden="true">ⓘ</span><span>Info</span>
+    </button>
+  </nav>
+
+  <!-- ======================= MODALE ESAME ======================= -->
+  <div class="modal-overlay" id="modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <h2 id="modal-title">Esame</h2>
+      <form id="exam-form">
+        <label class="field">
+          <span>Nome</span>
+          <input type="text" id="f-name" required placeholder="Es. Aerodinamica 1" />
+        </label>
+        <label class="field">
+          <span>CFU</span>
+          <input type="number" id="f-cfu" required min="1" max="30" step="1" placeholder="9" />
+        </label>
+        <fieldset class="seg">
+          <legend>Tipo</legend>
+          <label><input type="radio" name="ftype" value="voto" checked /> Con voto</label>
+          <label><input type="radio" name="ftype" value="idoneita" /> Idoneità</label>
+        </fieldset>
+        <div id="grade-block">
+          <label class="field">
+            <span>Voto <small class="muted">(lascia vuoto se non ancora sostenuto)</small></span>
+            <input type="number" id="f-grade" min="18" max="30" step="1" placeholder="—" />
+          </label>
+          <label class="check"><input type="checkbox" id="f-lode" /> 30 e lode</label>
+        </div>
+        <label class="check" id="passed-block" hidden><input type="checkbox" id="f-passed" /> Superata</label>
+        <div class="modal-actions">
+          <button type="button" class="btn" id="modal-cancel">Annulla</button>
+          <button type="submit" class="btn btn-primary">Salva</button>
+        </div>
+        <button type="button" class="btn btn-danger btn-block" id="modal-delete" hidden>Elimina esame</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
