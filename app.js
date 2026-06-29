@@ -36,17 +36,9 @@ const PLAN = [
   ['Prova Finale', 3, 'idoneita', 3, false],
 ];
 
-// Voti già registrati (i tuoi). Tutto il resto resta "da sostenere".
-const SEED_GRADES = {
-  'Analisi Matematica 1': 25,
-  'Disegno Tecnico Industriale': 28,
-  'Elementi di Chimica': 22,
-  'Fondamenti di Algebra Lineare e Geometria': 19,
-  'Fisica 1': 22,
-  'Fondamenti di Astronomia e Astrofisica': 28,
-  'Calcolo Numerico': 26,
-  'Fisica 2': 22,
-};
+// Voti registrati di default. Lasciato vuoto: ogni utente parte da zero
+// e registra i propri voti via UI o import JSON.
+const SEED_GRADES = {};
 
 function uid() {
   return 'e' + Math.random().toString(36).slice(2, 9);
@@ -132,7 +124,7 @@ if (typeof document !== 'undefined') {
       const raw = localStorage.getItem(STORE_KEY);
       if (raw) return JSON.parse(raw);
     } catch (_) {}
-    const seeded = { exams: buildPlan(true) };
+    const seeded = { exams: buildPlan(false) };
     save(seeded);
     return seeded;
   }
@@ -199,13 +191,15 @@ if (typeof document !== 'undefined') {
   }
 
   function examRow(e) {
-    const tag = e.elective ? ' · a scelta' : '';
+    const parts = [`${e.cfu} CFU`];
+    if (e.elective) parts.push('a scelta');
+    if (e.year) parts.push(`${e.year}° anno`);
     const li = document.createElement('li');
     li.className = 'exam-item';
     li.innerHTML =
       `<div class="exam-body">
          <div class="exam-name">${escapeHtml(e.name)}</div>
-         <div class="exam-sub">${e.cfu} CFU${tag} · ${e.year ? e.year + '° anno' : ''}</div>
+         <div class="exam-sub">${parts.join(' · ')}</div>
        </div>` + chip(e);
     li.addEventListener('click', () => openModal(e.id));
     return li;
@@ -355,7 +349,6 @@ if (typeof document !== 'undefined') {
     $('#import-data').addEventListener('click', () => $('#import-file').click());
     $('#import-file').addEventListener('change', (e) => { if (e.target.files[0]) importData(e.target.files[0]); });
     $('#load-template').addEventListener('click', () => resetTo(() => buildPlan(false), 'Caricare il piano Aerospaziale senza voti? I dati attuali verranno sostituiti.'));
-    $('#load-seed').addEventListener('click', () => resetTo(() => buildPlan(true), 'Ricaricare i dati d\'esempio? I dati attuali verranno sostituiti.'));
     $('#clear-all').addEventListener('click', () => resetTo(() => [], 'Azzerare tutti gli esami?'));
     render();
   });

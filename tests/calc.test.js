@@ -8,24 +8,47 @@ function check(name, cond) {
   else { fail++; console.log('FAIL  ' + name); }
 }
 
-const exams = A.buildPlan(true);
+// Piano vuoto: nessun voto registrato — l'app parte sempre da zero.
+const empty = A.buildPlan(false);
+const se = A.computeStats(empty);
+check('piano vuoto: nessun CFU con voto', se.doneCFU === 0);
+check('piano vuoto: media null', se.media === null);
+check('piano vuoto: CFU totali = 180', se.totalCFU === 180);
+check('piano vuoto: requiredAverage = null se nessun rimasto?',
+      A.requiredAverage(se, 25) != null); // ci sono CFU rimasti
+check('piano vuoto: projectedFinal usa media futura',
+      near(A.projectedFinal(se, 27), 27));
+
+// Piano sintetico con voti noti — verifica i calcoli.
+const exams = [
+  { id: 'a', name: 'A', cfu: 12, type: 'voto', grade: 27, lode: false, passed: false },
+  { id: 'b', name: 'B', cfu:  9, type: 'voto', grade: 24, lode: false, passed: false },
+  { id: 'c', name: 'C', cfu:  6, type: 'voto', grade: 30, lode: true,  passed: false }, // 30 e lode = 30
+  { id: 'd', name: 'D', cfu:  9, type: 'voto', grade: null, lode: false, passed: false }, // da fare
+  { id: 'e', name: 'E', cfu:  3, type: 'idoneita', grade: null, lode: false, passed: true },
+];
 const s = A.computeStats(exams);
+check('doneCFU = 27', s.doneCFU === 27);
+check('remCFU = 9',  s.remCFU === 9);
+check('totalCFU = 39', s.totalCFU === 39);
+check('weighted = 27*12 + 24*9 + 30*6 = 720', s.weighted === 720);
+check('media = 720/27 ≈ 26.667', near(s.media, 26.667));
+check('acquiredCFU = 27 + 3 (idoneità superata) = 30', s.acquiredCFU === 30);
 
-check('CFU con voto già dati = 69', s.doneCFU === 69);
-check('CFU con voto rimasti = 105', s.remCFU === 105);
-check('CFU con voto totali = 174', s.totalGradedCFU === 174);
-check('CFU totali = 180', s.totalCFU === 180);
-check('somma pesata = 1635', s.weighted === 1635);
-check('media ponderata ~ 23.696', near(s.media, 23.696));
+// Voto medio necessario sui 9 CFU rimasti per chiudere a 27 di media
+// (27 * 36 - 720) / 9 = (972 - 720) / 9 = 28
+check('serve esattamente 28 per chiudere a 27', near(A.requiredAverage(s, 27), 28));
 
-check('serve ~26.69 per media 25.5', near(A.requiredAverage(s, 25.5), 26.686));
-check('serve ~27.51 per media 26.0', near(A.requiredAverage(s, 26.0), 27.514));
+// Media finale con 28 di media sui rimasti
+// (720 + 28*9) / 36 = 972 / 36 = 27
+check('projectedFinal con 28 ≈ 27', near(A.projectedFinal(s, 28), 27));
 
-check('media finale con 27 di media futura ~25.69', near(A.projectedFinal(s, 27), 25.690));
-check('voto base /110 a media 26 ~95.3', near(A.base110(26), 95.333, 0.01));
+// base110: 27/30 * 110 = 99
+check('base110(27) = 99', near(A.base110(27), 99));
 
-check('feasibility 26.69 = impegnativo', A.feasibility(26.69).txt === 'impegnativo');
+check('feasibility 28 = impegnativo', A.feasibility(28).txt === 'impegnativo');
 check('feasibility 31 = non raggiungibile', A.feasibility(31).txt === 'non raggiungibile');
+check('feasibility null = vuoto', A.feasibility(null).txt === '');
 
 console.log(`\n${pass} passati, ${fail} falliti`);
 process.exit(fail ? 1 : 0);
