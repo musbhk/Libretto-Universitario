@@ -28,7 +28,7 @@ python3 -m http.server 8000
 
 1. Crea un repository e carica il contenuto di questa cartella nella radice.
 2. *Settings → Pages → Branch: `main` / root → Save*.
-3. Apri l'URL `https://github.com/musbhk/Libretto-Universitario.git`. I percorsi sono relativi, quindi funziona anche nel sottopercorso del repo.
+3. Apri l'URL `https://musbhk.github.io/Libretto-Universitario/`. I percorsi sono relativi, quindi funziona anche nel sottopercorso del repo.
 
 ## Installare su iPhone
 
